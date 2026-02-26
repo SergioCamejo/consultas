@@ -195,6 +195,10 @@ document.getElementById("consultaForm").addEventListener("submit", async functio
             resultadoDiv.innerHTML += generarTabla("Tabla LOPCC", data.LOPCC);
         }
 
+        if (data.SENT1) {
+            resultadoDiv.innerHTML += generarTabla("Tabla SENT", data.SENT);
+        }
+
         if (data.SENT) {
             resultadoDiv.innerHTML += generarTabla("Tabla SENT", data.SENT);
         }
