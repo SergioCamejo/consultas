@@ -7,21 +7,21 @@
     <style>
     body {
         font-family: Arial, sans-serif;
-        background-color: #2f343a; /* Gris oscuro suave */
+        background-color: #2f343a;
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+        align-items: flex-start;
+        padding-top: 40px;
         margin: 0;
         color: #e4e6eb;
     }
 
     .container {
-        background-color: #3b4047; /* Gris intermedio mate */
+        background-color: #3b4047;
         padding: 35px;
         border-radius: 12px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-        width: 380px;
+        width: 900px;
     }
 
     h2 {
@@ -75,12 +75,41 @@
     button:hover {
         background-color: #3d65d6;
     }
+
+    .tabla-container {
+        margin-top: 40px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #4a5057;
+        margin-bottom: 30px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    th, td {
+        border: 1px solid #555;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #3b4047;
+        font-weight: bold;
+    }
+
+    h3 {
+        margin-bottom: 10px;
+        color: #ffffff;
+    }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Bienvenido 👋</h2>
+    <h2>Consulta de Documento</h2>
     <p>Ingrese los datos para realizar la consulta:</p>
 
     <form id="consultaForm">
@@ -103,8 +132,37 @@
 
         <button type="submit">Consultar</button>
     </form>
-    <div id="resultado" style="margin-top:20px;"></div>
-    <script>
+
+    <div id="resultado" class="tabla-container"></div>
+</div>
+
+<script>
+
+function generarTabla(titulo, datos) {
+    if (!datos || Object.keys(datos).length === 0) {
+        return `<h3>${titulo}</h3><p>No se encontraron datos.</p>`;
+    }
+
+    let html = `<h3>${titulo}</h3>`;
+    html += `<table><thead><tr>`;
+
+    // Encabezados
+    for (let key in datos) {
+        html += `<th>${key}</th>`;
+    }
+
+    html += `</tr></thead><tbody><tr>`;
+
+    // Valores
+    for (let key in datos) {
+        html += `<td>${datos[key] ?? '-'}</td>`;
+    }
+
+    html += `</tr></tbody></table>`;
+
+    return html;
+}
+
 document.getElementById("consultaForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -112,7 +170,7 @@ document.getElementById("consultaForm").addEventListener("submit", async functio
     const documento = document.querySelector("input[name='documento']").value;
 
     const resultadoDiv = document.getElementById("resultado");
-    resultadoDiv.innerHTML = "Consultando...";
+    resultadoDiv.innerHTML = "<p>Consultando...</p>";
 
     try {
         const response = await fetch("https://n8n.iflow21.com/webhook/documento", {
@@ -128,19 +186,31 @@ document.getElementById("consultaForm").addEventListener("submit", async functio
 
         const data = await response.json();
 
-        resultadoDiv.innerHTML = `
-            <strong>PCCId:</strong> ${data.PCCId || '-'}<br>
-            <strong>PCCFec:</strong> ${data.PCCFec || '-'}<br>
-            <strong>PCCEST:</strong> ${data.PCCEST || '-'}
-        `;
+        console.log(data); // Para debug
+
+        resultadoDiv.innerHTML = "";
+
+        // Si viene estructurado por tablas
+        if (data.LOPCC) {
+            resultadoDiv.innerHTML += generarTabla("Tabla LOPCC", data.LOPCC);
+        }
+
+        if (data.SENT) {
+            resultadoDiv.innerHTML += generarTabla("Tabla SENT", data.SENT);
+        }
+
+        // Si viene todo plano (por ahora)
+        if (!data.LOPCC && !data.SENT) {
+            resultadoDiv.innerHTML += generarTabla("Resultado Consulta", data);
+        }
 
     } catch (error) {
-        resultadoDiv.innerHTML = "Error al consultar.";
+        resultadoDiv.innerHTML = "<p>Error al consultar.</p>";
         console.error(error);
     }
 });
+
 </script>
-</div>
 
 </body>
 </html>
