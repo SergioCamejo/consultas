@@ -83,7 +83,7 @@
     <h2>Bienvenido 👋</h2>
     <p>Ingrese los datos para realizar la consulta:</p>
 
-    <form action="https://n8n.iflow21.com/webhook/documento" method="POST">
+    <form id="consultaForm">
         
         <label for="centro">Centro:</label>
         <select name="centro" required>
@@ -103,6 +103,43 @@
 
         <button type="submit">Consultar</button>
     </form>
+    <div id="resultado" style="margin-top:20px;"></div>
+    <script>
+document.getElementById("consultaForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const centro = document.querySelector("select[name='centro']").value;
+    const documento = document.querySelector("input[name='documento']").value;
+
+    const resultadoDiv = document.getElementById("resultado");
+    resultadoDiv.innerHTML = "Consultando...";
+
+    try {
+        const response = await fetch("https://n8n.iflow21.com/webhook/documento", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                centro: centro,
+                documento: documento
+            })
+        });
+
+        const data = await response.json();
+
+        resultadoDiv.innerHTML = `
+            <strong>PCCId:</strong> ${data.PCCId || '-'}<br>
+            <strong>PCCFec:</strong> ${data.PCCFec || '-'}<br>
+            <strong>PCCEST:</strong> ${data.PCCEST || '-'}
+        `;
+
+    } catch (error) {
+        resultadoDiv.innerHTML = "Error al consultar.";
+        console.error(error);
+    }
+});
+</script>
 </div>
 
 </body>
