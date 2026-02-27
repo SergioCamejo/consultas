@@ -225,11 +225,6 @@ document.getElementById("consultaForm").addEventListener("submit", async functio
             );
         }
 
-        // Si viene todo plano (por ahora)
-        if (!data.LOPCC && !data.SENT) {
-            resultadoDiv.innerHTML += generarTabla("Resultado Consulta", data);
-        }
-
     } catch (error) {
         resultadoDiv.innerHTML = "<p>Error al consultar.</p>";
         console.error(error);
