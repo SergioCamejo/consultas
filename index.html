@@ -138,27 +138,39 @@
 
 <script>
 
-function generarTabla(titulo, datos) {
+function generarTabla(titulo, datos, columnasPermitidas = null) {
+
     if (!datos || Object.keys(datos).length === 0) {
-        return `<h3>${titulo}</h3><p>No se encontraron datos.</p>`;
+        return `
+            <div style="background:#32373d; padding:20px; border-radius:10px; margin-top:30px;">
+                <h3>${titulo}</h3>
+                <p>No se encontraron datos.</p>
+            </div>
+        `;
     }
 
-    let html = `<h3>${titulo}</h3>`;
-    html += `<table><thead><tr>`;
+    let html = `
+        <div style="background:#32373d; padding:20px; border-radius:10px; margin-top:30px;">
+        <h3 style="margin-bottom:15px;">${titulo}</h3>
+        <table>
+        <thead><tr>
+    `;
 
-    // Encabezados
-    for (let key in datos) {
+    const claves = columnasPermitidas 
+        ? columnasPermitidas 
+        : Object.keys(datos);
+
+    claves.forEach(key => {
         html += `<th>${key}</th>`;
-    }
+    });
 
     html += `</tr></thead><tbody><tr>`;
 
-    // Valores
-    for (let key in datos) {
+    claves.forEach(key => {
         html += `<td>${datos[key] ?? '-'}</td>`;
-    }
+    });
 
-    html += `</tr></tbody></table>`;
+    html += `</tr></tbody></table></div>`;
 
     return html;
 }
@@ -185,45 +197,45 @@ document.getElementById("consultaForm").addEventListener("submit", async functio
         });
 
         const data = await response.json();
-
-        console.log(data); // Para debug
+        console.log(data);
 
         resultadoDiv.innerHTML = "";
 
-        // Si viene estructurado por tablas
-        if (data.LOPCC) {
-            resultadoDiv.innerHTML += generarTabla("Tabla LOPCC", data.LOPCC);
+        // 🔹 Separar por prefijo
+        const lopcc = {};
+        const sent = {};
+
+        for (let key in data) {
+            if (key.startsWith("PCC")) {
+                lopcc[key] = data[key];
+            }
+            if (key.startsWith("SEnt") || key.startsWith("Sent")) {
+                sent[key] = data[key];
+            }
         }
 
-        if (data.LOPCC) {
-            resultadoDiv.innerHTML += generarTabla(
-                "Tabla LOPCC",
-                data.LOPCC,
-                [
-                    "PCCId",
-                    "PCCFec",
-                    "PCCEST"
-                ]
-            );
-        }
+        // 🔹 Mostrar solo ciertos campos si querés
+        resultadoDiv.innerHTML += generarTabla(
+            "Tabla LOPCC",
+            lopcc,
+            ["PCCId", "PCCFec", "PCCEST"]
+        );
 
-        if (data.SENT) {
-            resultadoDiv.innerHTML += generarTabla(
-                "Tabla SENT",
-                data.SENT,
-                [
-                    "SEntDocNro",
-                    "SEntUsuAlt",
-                    "SEntEntId",
-                    "SEntEntDsc",
-                    "SEntEstEnt",
-                    "SentPCCId",
-                    "SentNroDsp",
-                    "SentLEnID",
-                    "SentEnvDat"
-                ]
-            );
-        }
+        resultadoDiv.innerHTML += generarTabla(
+            "Tabla SENT",
+            sent,
+            [
+                "SEntDocNro",
+                "SEntUsuAlt",
+                "SEntEntId",
+                "SEntEntDsc",
+                "SEntEstEnt",
+                "SentPCCId",
+                "SentNroDsp",
+                "SentLEnID",
+                "SentEnvDat"
+            ]
+        );
 
     } catch (error) {
         resultadoDiv.innerHTML = "<p>Error al consultar.</p>";
