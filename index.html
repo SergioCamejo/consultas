@@ -195,12 +195,34 @@ document.getElementById("consultaForm").addEventListener("submit", async functio
             resultadoDiv.innerHTML += generarTabla("Tabla LOPCC", data.LOPCC);
         }
 
-        if (data.SENT1) {
-            resultadoDiv.innerHTML += generarTabla("Tabla SENT", data.SENT);
+        if (data.LOPCC) {
+            resultadoDiv.innerHTML += generarTabla(
+                "Tabla LOPCC",
+                data.LOPCC,
+                [
+                    "PCCId",
+                    "PCCFec",
+                    "PCCEST"
+                ]
+            );
         }
 
         if (data.SENT) {
-            resultadoDiv.innerHTML += generarTabla("Tabla SENT", data.SENT);
+            resultadoDiv.innerHTML += generarTabla(
+                "Tabla SENT",
+                data.SENT,
+                [
+                    "SEntDocNro",
+                    "SEntUsuAlt",
+                    "SEntEntId",
+                    "SEntEntDsc",
+                    "SEntEstEnt",
+                    "SentPCCId",
+                    "SentNroDsp",
+                    "SentLEnID",
+                    "SentEnvDat"
+                ]
+            );
         }
 
         // Si viene todo plano (por ahora)
